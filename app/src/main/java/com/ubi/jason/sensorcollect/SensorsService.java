@@ -20,12 +20,10 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.ubi.jason.sensorcollect.helper.Config;
-import com.ubi.jason.sensorcollect.interfaces.EECalcListener;
 import com.ubi.jason.sensorcollect.interfaces.SensorListener;
 import com.ubi.jason.sensorcollect.interfaces.ServiceControl;
 import com.ubi.jason.sensorcollect.interfaces.ServiceListener;
 
-import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -34,7 +32,7 @@ import java.util.TimerTask;
 /**
  * Created by jasoncosta on 11/30/2015.
  */
-public class SensorsService extends Service implements SensorListener, ServiceControl, EECalcListener {
+public class SensorsService extends Service implements SensorListener, ServiceControl {
 
     private static final String TAG = "SENSOR_SERVICE";
     // Notification
@@ -43,7 +41,6 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     private NotificationCompat.Builder mBuilder;
     private Files fileWriter;
     // Classes
-    private EECalc EECalc;
     private ServiceListener UpdateListener;
     private Map<String, Sensor> sensorMap;
     private Sensors sensors;
@@ -51,8 +48,6 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     private static int serviceStatus;
     private static int timestamp;
     private static int serviceID;
-    private static double EEactKcal = 0.0;
-    private static double EEactJoule = 0.0;
     private static float[] currentValues;
     private static float[] offset;
     private static float[] filteredValues;
@@ -114,11 +109,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
                 updateTime.cancel();
                 updateTime.purge();
             }
-            if (EECalc != null) {
-                EECalc.reset();
-            }
             UpdateListener.updateTime(0);
-            UpdateListener.updateEE(0.0);
             timestamp = 0;
         }
     }
@@ -151,7 +142,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     }
 
     private void notificationPause() {
-        mBuilder.setContentText("Pausado.");
+        mBuilder.setContentText("Pausado");
         mBuilder.setColor(ContextCompat.getColor(this, R.color.yellow));
         notification = mBuilder.build();
         notification.flags = Notification.FLAG_ONGOING_EVENT;
@@ -160,7 +151,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
 
     private void notificationDone() {
         if (mBuilder != null) {
-            mBuilder.setContentText("Parado.");
+            mBuilder.setContentText("Parado");
             mBuilder.setProgress(0, 1, false);
             mBuilder.setColor(ContextCompat.getColor(this, R.color.red));
             notification = mBuilder.build();
@@ -176,8 +167,8 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
             builder.setContentIntent(pendingIntent);
             mNotifyManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             mBuilder = new NotificationCompat.Builder(this);
-            mBuilder.setContentTitle("Gastos energéticos")
-                    .setContentText("0 kcal")
+            mBuilder.setContentTitle("Sensor Collection")
+                    .setContentText("Parado")
                     .setContentIntent(pendingIntent)
                     .setSmallIcon(R.mipmap.ic_launcher);
             mBuilder.setColor(ContextCompat.getColor(this, R.color.green));
@@ -185,8 +176,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
             notification.flags = Notification.FLAG_ONGOING_EVENT;
             mNotifyManager.notify(1, notification);
         } else {
-            DecimalFormat numberFormat = new DecimalFormat("#.##");
-            updateNotification(numberFormat.format(EEactKcal) + " kcal");
+            updateNotification("Parado");
         }
     }
 
@@ -200,7 +190,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
         if (event.values[0] < event.sensor.getMaximumRange()) {
             currentValues = new float[]{event.values[0], event.values[1], event.values[2]};
             filteredValues = new float[]{event.values[0] - offset[0], event.values[1] - offset[1], event.values[2] - offset[2]};
-            EECalc.addValue(filteredValues);
+            fileWriter.writeSensorData(event);
             //Log.i(TAG, "Calibrado: " + filteredValues[0] + ", " + filteredValues[1] + ", " + filteredValues[2]);
         }
     }
@@ -223,8 +213,6 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
 
     @Override
     public void start() {
-        String userInfoKeys[] = getResources().getStringArray(R.array.user_info_keys);
-        EECalc = new EECalc(this, getValuesFromPref(userInfoKeys));
         createNotification();
         if (offset == null) {
             getCalibrationValues();
@@ -272,11 +260,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
                     updateTime.cancel();
                     updateTime.purge();
                 }
-                if (EECalc != null) {
-                    EECalc.reset();
-                }
                 UpdateListener.updateTime(0);
-                UpdateListener.updateEE(0.0);
                 timestamp = 0;
             }
             new DataUpload(this);
@@ -293,43 +277,13 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
 
     }
 
-    @Override
-    public void EECalcComplete(double EEactJoule) {
-        this.EEactKcal = EEactJoule / 4.184;
-        this.EEactJoule = EEactJoule;
-        Log.i(TAG, "\nEEactKcal");
-        DecimalFormat numberFormat = new DecimalFormat("#.##");
-        if (serviceStatus == Config.SERVICE_STATUS_RUNNING) {
-            //Log.i(TAG, String.valueOf(Math.sqrt((lastEvent.values[0]*lastEvent.values[0])+(lastEvent.values[1]*lastEvent.values[1])+(lastEvent.values[2]*lastEvent.values[2]))));
-            //updateNotification(lastEvent.sensor.getName().substring(0, 4) + ": "+String.valueOf(Math.sqrt(Math.pow(lastEvent.values[0], 2)+Math.pow(lastEvent.values[1], 2)+Math.pow(lastEvent.values[2], 2))).substring(0, 5));
-            updateNotification(numberFormat.format(EEactKcal) + " kcal");
-            fileWriter.writeSensorData(numberFormat.format(EEactKcal));
-            if (UpdateListener != null) {
-                Handler refresh = new Handler(Looper.getMainLooper());
-                refresh.post(new Runnable() {
-                    public void run() {
-                        UpdateListener.updateEE(SensorsService.EEactJoule);
-                    }
-                });
-            }
-        }
-    }
-
     class updateTime extends TimerTask {
         public void run() {
-            if ((timestamp != 0) && (timestamp % 60 == 0)) {
-                EECalc.calcEE();
-            }
             if (UpdateListener != null) {
                 Handler refresh = new Handler(Looper.getMainLooper());
                 refresh.post(new Runnable() {
                     public void run() {
                         UpdateListener.updateTime(timestamp);
-                        if (filteredValues != null) {
-                            UpdateListener.updateSensorValues(filteredValues);
-                        } else {
-                            UpdateListener.updateSensorValues(currentValues);
-                        }
                     }
                 });
             }

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EE Monitor</string>
+    <string name="app_name">Sensor Collection</string>
     <string name="action_settings">Settings</string>
     <!--Drawer -->
     <string name="drawer_open">Open navigation drawer</string>

@@ -5,10 +5,6 @@ package com.ubi.jason.sensorcollect.interfaces;
  */
 public interface ServiceListener {
 
-    void updateEE(Double kjoule);
-
-    void updateSensorValues(float[] sensor);
-
     void updateTime(int timestamp);
 
 }

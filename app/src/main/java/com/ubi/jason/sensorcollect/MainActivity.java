@@ -82,12 +82,6 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
     private ListView drawerList;
     private static String appTitle;
     private ArrayList<String> drawerValues;
-    private GraphView graph;
-    private int graphN = 0;
-    private LineGraphSeries<DataPoint> graphX;
-    private LineGraphSeries<DataPoint> graphY;
-    private LineGraphSeries<DataPoint> graphZ;
-    private DataPoint[] dp;
 
     public void addOnChangedListener(ServiceControl listener) {
         serviceControl = listener;
@@ -122,17 +116,6 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         drawerToggle.syncState();
-        graph = (GraphView) findViewById(R.id.graph);
-        dp = new DataPoint[]{new DataPoint(0, 0)};
-        graphX = new LineGraphSeries<DataPoint>(dp);
-        graphY = new LineGraphSeries<DataPoint>(dp);
-        graphZ = new LineGraphSeries<DataPoint>(dp);
-        graph.addSeries(graphX);
-        graphX.setColor(Color.RED);
-        graph.addSeries(graphY);
-        graphY.setColor(Color.GREEN);
-        graph.addSeries(graphZ);
-        graphZ.setColor(Color.YELLOW);
     }
 
     @Override
@@ -372,20 +355,6 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
         editor.remove("y");
         editor.remove("z");
         editor.commit();
-    }
-
-    @Override
-    public void updateEE(Double kjoule) {
-        fragViewUpdate.updateViewEE(kjoule);
-    }
-
-    @Override
-    public void updateSensorValues(float[] sensor) {
-        graphN++;
-        graphX.appendData(new DataPoint(graphN, sensor[0]), true, 20);
-        graphY.appendData(new DataPoint(graphN, sensor[1]), true, 20);
-        graphZ.appendData(new DataPoint(graphN, sensor[2]), true, 20);
-        fragViewUpdate.updateViewSensor(sensor);
     }
 
     @Override

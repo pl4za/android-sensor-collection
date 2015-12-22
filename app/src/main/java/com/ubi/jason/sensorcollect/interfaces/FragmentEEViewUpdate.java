@@ -5,10 +5,6 @@ package com.ubi.jason.sensorcollect.interfaces;
  */
 public interface FragmentEEViewUpdate {
 
-    void updateViewEE(double kjoule);
-
     void updateViewTime(int timestamp);
-
-    void updateViewSensor(float[] sensor);
 
 }

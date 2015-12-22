@@ -30,7 +30,7 @@ public class FragmentEE extends Fragment implements View.OnClickListener, Fragme
     private static final String TAG = "MAIN_FRAG";
     private ToggleButton tglTrack;
     private Button btnStop, btnCalibrate;
-    private TextView tvKcal, tvKjoule, tvTime, tvSensor;
+    private TextView tvTime;
     private View view;
     private static Context context;
     private static boolean START_COMMAND = false;
@@ -65,10 +65,7 @@ public class FragmentEE extends Fragment implements View.OnClickListener, Fragme
 
     private void setButtonListeners() {
         tglTrack = (ToggleButton) view.findViewById(R.id.tglTrack);
-        tvKcal = (TextView) view.findViewById(R.id.tvKcal);
-        tvKjoule = (TextView) view.findViewById(R.id.tvJoule);
         tvTime = (TextView) view.findViewById(R.id.tvTime);
-        tvSensor = (TextView) view.findViewById(R.id.tvSensor);
         btnStop = (Button) view.findViewById(R.id.btnStop);
         btnCalibrate = (Button) view.findViewById(R.id.btnCalibrate);
         tglTrack.setOnClickListener(this);
@@ -98,19 +95,6 @@ public class FragmentEE extends Fragment implements View.OnClickListener, Fragme
         } else if (id == R.id.btnCalibrate) {
             ((ServiceControl)getActivity()).openFragmentCalibrate();
         }
-    }
-
-    @Override
-    public void updateViewEE(double kjoule) {
-        DecimalFormat numberFormat = new DecimalFormat("#.##");
-        tvKcal.setText(numberFormat.format(kjoule / 4.184) + " kcal");
-        tvKjoule.setText(numberFormat.format(kjoule) + " kJ");
-    }
-
-    @Override
-    public void updateViewSensor(float[] sensor) {
-        DecimalFormat numberFormat = new DecimalFormat("#.##");
-        tvSensor.setText("X: "+numberFormat.format(sensor[0])+" Y: "+numberFormat.format(sensor[1])+" Z: "+numberFormat.format(sensor[2]));
     }
 
     @Override

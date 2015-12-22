@@ -5,8 +5,8 @@ package com.ubi.jason.sensorcollect.helper;
  */
 public class Config {
     // File upload url (replace the ip with your server address)
-    //public static final String FILE_UPLOAD_URL = "http://192.168.42.11/sensorsDataTese/fileUpload.php";
-    public static final String FILE_UPLOAD_URL = "http://192.168.209.199/sensorsDataTese/fileUpload.php";
+    public static final String FILE_UPLOAD_URL = "http://192.168.42.11/sensorsDataTese/fileUpload.php";
+    //public static final String FILE_UPLOAD_URL = "http://192.168.209.199/sensorsDataTese/fileUpload.php";
     //public static final String FILE_UPLOAD_URL = "http://193.126.80.249/sensorsDataTese/fileUpload.php";
 
     //Service

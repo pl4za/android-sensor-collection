@@ -43,6 +43,7 @@ public class Calibration implements SensorListener, CalibrationControl {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        Log.i(TAG, "x: " + String.valueOf(event.values[0]) + " y: " + String.valueOf(event.values[1]) + " z: " + String.valueOf(event.values[2]));
         currentValues = new float[]{event.values[0], event.values[1], event.values[2]};
         if ((event.values[0] < 0.5 && event.values[0] > -0.5) && //X
                 (event.values[1] < 0.5 && event.values[1] > -0.5) && //Y
