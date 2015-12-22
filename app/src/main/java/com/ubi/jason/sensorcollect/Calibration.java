@@ -47,7 +47,7 @@ public class Calibration implements SensorListener, CalibrationControl {
         currentValues = new float[]{event.values[0], event.values[1], event.values[2]};
         if ((event.values[0] < 0.5 && event.values[0] > -0.5) && //X
                 (event.values[1] < 0.5 && event.values[1] > -0.5) && //Y
-                (event.values[2] < 10.5 && event.values[2] > 8.5)) { //Z
+                (event.values[2] < 10.5 && event.values[2] > 4)) { //Z TODO: Tablet deco reports very bad values. DEFAULT: 8.5
             if (calibrateTime == null) {
                 calibrateTime = new Timer();
                 calibrateTime.schedule(new calibrateTime(), 0, 1000); //Countdowns from 5 and resets if device moves

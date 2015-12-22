@@ -229,6 +229,7 @@ public class DataUpload extends BroadcastReceiver {
                 // Device info
                 JSONObject jDevice = new JSONObject();
                 jDevice.put("device_id", android_id);
+                jDevice.put("sensor_type", "accel");
                 // Build main json
                 mainObj.put("deviceInfo", jDevice);
                 // User info

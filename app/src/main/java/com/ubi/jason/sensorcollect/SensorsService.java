@@ -24,6 +24,7 @@ import com.ubi.jason.sensorcollect.interfaces.SensorListener;
 import com.ubi.jason.sensorcollect.interfaces.ServiceControl;
 import com.ubi.jason.sensorcollect.interfaces.ServiceListener;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -190,7 +191,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
         if (event.values[0] < event.sensor.getMaximumRange()) {
             currentValues = new float[]{event.values[0], event.values[1], event.values[2]};
             filteredValues = new float[]{event.values[0] - offset[0], event.values[1] - offset[1], event.values[2] - offset[2]};
-            fileWriter.writeSensorData(event);
+            fileWriter.writeSensorData(filteredValues);
             //Log.i(TAG, "Calibrado: " + filteredValues[0] + ", " + filteredValues[1] + ", " + filteredValues[2]);
         }
     }
@@ -278,8 +279,10 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     }
 
     class updateTime extends TimerTask {
+        DecimalFormat numberFormat = new DecimalFormat("#.00");
         public void run() {
             if (UpdateListener != null) {
+                updateNotification(numberFormat.format(filteredValues[0])+", "+numberFormat.format(filteredValues[1])+", "+numberFormat.format(filteredValues[2]));
                 Handler refresh = new Handler(Looper.getMainLooper());
                 refresh.post(new Runnable() {
                     public void run() {

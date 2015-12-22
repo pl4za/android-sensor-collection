@@ -106,11 +106,11 @@ public class Files {
         return false;
     }
 
-    public void writeSensorData(SensorEvent event) {
+    public void writeSensorData(float[] event) {
         try {
             //Log.i(TAG, event.sensor.getName().replace(" ", "_").toString());
             fileBuff = new BufferedWriter(new FileWriter(valuesFile, true));
-            fileBuff.append(Float.toString(event.values[0]) + "," + Float.toString(event.values[1]) + "," + Float.toString(event.values[2]) + "," + System.currentTimeMillis());
+            fileBuff.append(Float.toString(event[0]) + "," + Float.toString(event[1]) + "," + Float.toString(event[2]) + "," + System.currentTimeMillis());
             fileBuff.newLine();
             fileBuff.flush();
         } catch (IOException e) {
