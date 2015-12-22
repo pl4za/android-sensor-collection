@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">EE Monitor</string>
+    <string name="action_settings">Settings</string>
+    <!--Drawer -->
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <!--Dialog-->
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancelar</string>
+    <!--PReferences-->
+    <string name="preference">preference_file</string>
+    <string name="offset">offset_file</string>
+
+    <string-array
+        name="calib_colors">
+        <item>@color/red</item>
+        <item>@color/orange</item>
+        <item>@color/yellow</item>
+        <item>@color/green</item>
+    </string-array>
+
+    <string-array
+        name="drawer_items">
+        <item>Nome</item>
+        <item>Peso(Kg)</item>
+        <item>Altura(Cm)</item>
+        <item>Idade</item>
+        <item>Sexo</item>
+    </string-array>
+
+    <string-array
+        name="user_info_keys">
+        <item>name</item>
+        <item>weight</item>
+        <item>height</item>
+        <item>age</item>
+        <item>sex</item>
+    </string-array>
+
+    <string-array
+        name="sexo">
+        <item>Masculino</item>
+        <item>Feminino</item>
+    </string-array>
+
+    <string-array
+        name="drawer_icons">
+        <item>@drawable/ic_name</item>
+        <item>@drawable/ic_weight</item>
+        <item>@drawable/ic_height</item>
+        <item>@drawable/ic_idade</item>
+        <item>@drawable/ic_sex</item>
+    </string-array>
+</resources>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@drawable/list_row_selector"
+    android:paddingTop="15dp"
+    android:paddingBottom="15dp"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/ivDrawerIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+        android:adjustViewBounds="true"
+        android:maxHeight="45dp"
+        android:maxWidth="45dp"
+        android:paddingLeft="16dp"
+        android:src="@mipmap/note_48" />
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tvOption"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:ellipsize="end"
+        android:paddingLeft="72dp"
+        android:textSize="16sp"
+        android:layout_centerVertical="true"
+        android:singleLine="true"
+        android:textStyle="bold"
+        android:text="Nome"/>
+
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/tvValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:paddingLeft="8dp"
+        android:textSize="16sp"
+        android:singleLine="true"
+        android:textStyle="bold"
+        android:text="Jason Costa"
+        android:textColor="@color/colorPrimary"
+        android:layout_toRightOf="@+id/tvOption"
+        android:layout_centerVertical="true"
+        />
+
+</RelativeLayout>

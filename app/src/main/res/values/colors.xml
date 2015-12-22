@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="red">#cb1213</color>
+    <color name="green">#27b925</color>
+    <color name="yellow">#f2f02b</color>
+    <color name="orange">#ffa500</color>
+
+    <color name="grey">#DFE0E5</color>
+    <color name="darkgrey">#616161</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="list_divider">#DFE0E5</color>
+    <color name="tracklist_bg_color">#ffffff</color>
+
+    <!-- Drawer Interaction -->
+   	<color name="drawer_hover_end_color">#DFE0E5</color>
+   	<color name="drawer_hover_start_color">#DFE0E5</color>
+   	<color name="drawer_selected">#3F51B5</color>
+    <color name="drawer_bg_color">#ffffff</color>
+
+     <!-- List View  -->
+    <color name="list_row_start_color">#ffffff</color>
+    <color name="list_row_end_color">#ffffff</color>
+
+    <!-- List View tinteraction  -->
+    <color name="list_row_hover_start_color">#DFE0E5</color>
+    <color name="list_row_hover_end_color">#DFE0E5</color>
+
+    <!--Toolbar  -->
+    <!-- Set theme colors from http://www.google.com/design/spec/style/color.html#color-color-palette-->
+    <!-- colorPrimary is used for the default action bar background -->
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="textColorPrimary">#FFFFFF</color>
+    <color name="windowBackground">#FFFFFF</color>
+    <color name="navigationBarColor">#000000</color>
+    <color name="colorAccent">#C5CAE9</color>
+    <!-- FAB  -->
+    <color name="colorSecondary">#FF5722</color>
+    <!-- You can also set colorControlNormal, colorControlActivated
+         colorControlHighlight and colorSwitchThumbNormal. -->
+    <!-- notification -->
+    <color name="notification_text">#ffffff</color>
+    <color name="notification_text_secondary">#DFE0E5</color>
+
+</resources>

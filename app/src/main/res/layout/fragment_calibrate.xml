@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/white"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true">
+
+        <TextView
+            android:id="@+id/tvCalibrateInstruct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Posicione o telemovel sobre uma"
+            android:layout_centerHorizontal="true"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvCalibrateInstruct2"
+            android:layout_below="@+id/tvCalibrateInstruct"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="superficie plana e aguarde."
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+</RelativeLayout>

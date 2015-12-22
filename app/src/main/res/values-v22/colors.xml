@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- notification -->
+    <color name="notification_text">#000000</color>
+    <color name="notification_text_secondary">#616161</color>
+</resources>
