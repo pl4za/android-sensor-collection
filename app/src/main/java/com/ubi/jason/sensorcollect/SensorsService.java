@@ -14,6 +14,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
@@ -53,6 +54,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     private static float[] offset;
     private static float[] filteredValues;
     private Timer updateTime;
+    private PowerManager.WakeLock wl;
 
     public void registerListener(ServiceListener listener) {
         UpdateListener = listener;
@@ -75,6 +77,9 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
         fileWriter = new Files(this);
         //fileWriter = new Files(this, sensorMap);
         serviceStatus = Config.SERVICE_STATUS_STOP;
+        PowerManager pm = (PowerManager)this.getSystemService(
+                Context.POWER_SERVICE);
+        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         return new LocalBinder();
     }
 
@@ -113,16 +118,6 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
             UpdateListener.updateTime(0);
             timestamp = 0;
         }
-    }
-
-    public HashMap getValuesFromPref(String[] drawerItems) {
-        SharedPreferences sharedPref = this.getSharedPreferences(getResources().getString(R.string.preference), 0);
-        HashMap temp = new HashMap<>();
-        for (String a : drawerItems) {
-            Log.i(TAG, "Got: " + sharedPref.getString(a, ""));
-            temp.put(a, sharedPref.getString(a, ""));
-        }
-        return temp;
     }
 
     // Notification
@@ -214,6 +209,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
 
     @Override
     public void start() {
+        wl.acquire();
         createNotification();
         if (offset == null) {
             getCalibrationValues();
@@ -266,6 +262,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
             }
             new DataUpload(this);
         }
+        wl.release();
     }
 
     @Override
