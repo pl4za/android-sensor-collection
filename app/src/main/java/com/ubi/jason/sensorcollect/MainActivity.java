@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
             addOnChangedListener(sensorsService);
             mBound = true;
             if (START_COMMAND) {
-                start();
+                startOrPause();
             }
         }
 
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
             bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
         } else {
             if (START_COMMAND) {
-                start();
+                startOrPause();
             }
         }
     }
@@ -220,24 +220,29 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
     }
 
     @Override
-    public void start() {
-        if (isCalibrated()) {
-            serviceControl.start();
+    public void startOrPause() {
+        if (INFO_COMPLETE) {
+            if (isCalibrated()) {
+                serviceControl.startOrPause();
+            } else {
+                Toast.makeText(this, "É necessário calibrar.",
+                        Toast.LENGTH_SHORT).show();
+                openFragmentCalibrate();
+                fragViewUpdate.updateStartToggleStatus(false);
+            }
         } else {
-            Toast.makeText(getApplicationContext(), "É necessário calibrar.",
-                    Toast.LENGTH_SHORT).show();
-            openFragmentCalibrate();
+            new Handler().postDelayed(openDrawerRunnable(), 0);
+            Toast.makeText(this, "Por favor complete os seus dados",
+                    Toast.LENGTH_LONG).show();
+            fragViewUpdate.updateStartToggleStatus(false);
         }
     }
 
     @Override
     public void stop() {
-        serviceControl.stop();
-    }
-
-    @Override
-    public void pause() {
-        serviceControl.pause();
+        if (serviceControl!=null) {
+            serviceControl.stop();
+        }
     }
 
     @Override
@@ -287,7 +292,6 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
                 editor.putString(title, input);
                 editor.commit();
                 updateDrawerContent();
-
             }
         }
     }
@@ -329,32 +333,17 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
         }
     }
 
-    public static boolean isInfoComplete() {
-        return INFO_COMPLETE;
-    }
-
     public void registerFragmentListener(FragmentEEViewUpdate fragment) {
         this.fragViewUpdate = fragment;
     }
 
     public void openFragmentCalibrate() {
-        deleteOffset();
         FragmentCalibrate f = new FragmentCalibrate();
         FragmentManager fm = getSupportFragmentManager(); //or getFragmentManager() if you are not using support library.
         FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.container, f);
         ft.addToBackStack("fragmentCalibrate");
         ft.commit();
-    }
-
-    //TODO: remove
-    private void deleteOffset() {
-        SharedPreferences sharedPref = this.getSharedPreferences(getResources().getString(R.string.offset), 0);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.remove("x");
-        editor.remove("y");
-        editor.remove("z");
-        editor.commit();
     }
 
     @Override

@@ -33,7 +33,6 @@ public class FragmentEE extends Fragment implements View.OnClickListener, Fragme
     private TextView tvTime;
     private View view;
     private static Context context;
-    private static boolean START_COMMAND = false;
 
     public FragmentEE() {
     }
@@ -77,18 +76,7 @@ public class FragmentEE extends Fragment implements View.OnClickListener, Fragme
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.tglTrack) {
-            if (!tglTrack.isChecked()) {
-                ((ServiceControl)getActivity()).pause();
-            } else {
-                if (MainActivity.isInfoComplete()) {
-                    START_COMMAND = true;
-                    ((ServiceControl)getActivity()).start();
-                } else {
-                    tglTrack.setChecked(false);
-                    Toast.makeText(context, "Por favor complete os seus dados",
-                            Toast.LENGTH_LONG).show();
-                }
-            }
+            ((ServiceControl)getActivity()).startOrPause();
         } else if (id == R.id.btnStop) {
             ((ServiceControl)getActivity()).stop();
             tglTrack.setChecked(false);
@@ -101,5 +89,11 @@ public class FragmentEE extends Fragment implements View.OnClickListener, Fragme
     public void updateViewTime(int timestamp) {
         tvTime.setText(String.format("%02d", (timestamp / 3600)) + ":" + String.format("%02d", ((timestamp % 3600) / 60)) + ":" + String.format("%02d", (timestamp % 60)));
     }
+
+    @Override
+    public void updateStartToggleStatus(boolean status) {
+        tglTrack.setChecked(status);
+    }
+
 
 }

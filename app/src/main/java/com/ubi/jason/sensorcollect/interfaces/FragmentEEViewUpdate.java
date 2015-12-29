@@ -7,4 +7,6 @@ public interface FragmentEEViewUpdate {
 
     void updateViewTime(int timestamp);
 
+    void updateStartToggleStatus(boolean status);
+
 }

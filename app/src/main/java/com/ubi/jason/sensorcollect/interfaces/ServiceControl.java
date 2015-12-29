@@ -5,19 +5,15 @@ package com.ubi.jason.sensorcollect.interfaces;
  */
 public interface ServiceControl {
     /**
-     * Called to start the service
+     * Called to start or pause the service
      */
-    void start();
+    void startOrPause();
 
     /**
      * Called to stop the service
      */
     void stop();
 
-    /**
-     * Called to stop the service
-     */
-    void pause();
 
     /**
      * Called to retrieve system status

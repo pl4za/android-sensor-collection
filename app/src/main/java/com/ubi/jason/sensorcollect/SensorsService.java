@@ -208,35 +208,29 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     }
 
     @Override
-    public void start() {
-        wl.acquire();
-        createNotification();
-        if (offset == null) {
-            getCalibrationValues();
-        }
-        // Now that we have a notification, we disalow android to kill the service
-        startForeground(serviceID, notification);
-        sensors.addOnChangedListener(this);
-        sensors.start(sensorMap);
-        serviceStatus = Config.SERVICE_STATUS_RUNNING;
-        //TODO: might not start at the same time as sensor events..
-        updateTime = new Timer();
-        updateTime.schedule(new updateTime(), 1000, 1000);
-    }
-
-    @Override
-    public void pause() {
-        if (sensors != null) {
-            sensors.stop();
-            notificationPause();
-            serviceStatus = Config.SERVICE_STATUS_PAUSED;
-            //fileWriter.closeFile();
-            // timers stop
-            /*updateEE.cancel();
-            updateEE.purge();
-            */
-            updateTime.cancel();
-            updateTime.purge();
+    public void startOrPause() {
+        if (serviceStatus==Config.SERVICE_STATUS_RUNNING) {
+            if (sensors != null) {
+                sensors.stop();
+                notificationPause();
+                serviceStatus = Config.SERVICE_STATUS_PAUSED;
+                updateTime.cancel();
+                updateTime.purge();
+            }
+        } else {
+            wl.acquire();
+            createNotification();
+            if (offset == null) {
+                getCalibrationValues();
+            }
+            // Now that we have a notification, we disalow android to kill the service
+            startForeground(serviceID, notification);
+            sensors.addOnChangedListener(this);
+            sensors.start(sensorMap);
+            serviceStatus = Config.SERVICE_STATUS_RUNNING;
+            //TODO: might not start at the same time as sensor events..
+            updateTime = new Timer();
+            updateTime.schedule(new updateTime(), 1000, 1000);
         }
     }
 
@@ -262,7 +256,9 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
             }
             new DataUpload(this);
         }
-        wl.release();
+        if (wl.isHeld()) {
+            wl.release();
+        }
     }
 
     @Override

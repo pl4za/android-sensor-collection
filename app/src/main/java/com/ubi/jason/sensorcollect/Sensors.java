@@ -63,7 +63,7 @@ public class Sensors implements SensorEventListener {
             notifySensorError();
         } else {
             for (Map.Entry<String, Sensor> entry : sensorMap.entrySet()) {
-                mSensorManager.registerListener(this, entry.getValue(), SensorManager.SENSOR_DELAY_NORMAL);
+                mSensorManager.registerListener(this, entry.getValue(), SensorManager.SENSOR_DELAY_FASTEST);
             }
         }
     }
