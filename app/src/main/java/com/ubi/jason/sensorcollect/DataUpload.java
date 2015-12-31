@@ -57,6 +57,8 @@ public class DataUpload extends BroadcastReceiver {
     private static int i = 0;
     private static String android_id;
     private static boolean ERROR = false;
+    private static int progress = 0;
+    private static int newProgress = 0;
 
     public DataUpload() {
     }
@@ -166,7 +168,7 @@ public class DataUpload extends BroadcastReceiver {
         protected void onProgressUpdate(Integer... progress) {
             // updating progress bar value
             updateNotificationProgress(progress[0]);
-            updateNotification("Ficheiro " + String.valueOf(i + 1) + " de " + filesToSend.size() + ". Tamanho: " + (filesToSend.get(i).length() / 1024) + "KB");
+            //updateNotification("Ficheiro " + String.valueOf(i + 1) + " de " + filesToSend.size() + ". Tamanho: " + (filesToSend.get(i).length() / 1024) + "KB");
         }
 
         @Override
@@ -184,7 +186,8 @@ public class DataUpload extends BroadcastReceiver {
                         new MultiPartUploader.ProgressListener() {
                             @Override
                             public void transferred(long num) {
-                                publishProgress((int) ((num / (float) totalSize) * 100));
+                                Log.i(TAG, "Progress: " + progress + " - " + (int) ((num / (float) totalSize) * 100));
+                                publishProgress(((int) ((num / (float) totalSize) * 100)));
                             }
                         });
                 File sourceFile = new File(filesToSend.get(i).getAbsolutePath());

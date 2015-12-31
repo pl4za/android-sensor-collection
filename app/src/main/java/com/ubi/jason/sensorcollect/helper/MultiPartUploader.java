@@ -4,13 +4,11 @@ package com.ubi.jason.sensorcollect.helper;
  * Created by jasoncosta on 12/1/2015.
  */
 
-import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 
 @SuppressWarnings("deprecation")
 public class MultiPartUploader extends MultipartEntity
@@ -20,18 +18,6 @@ public class MultiPartUploader extends MultipartEntity
 
     public MultiPartUploader(final ProgressListener listener) {
         super();
-        this.listener = listener;
-    }
-
-    public MultiPartUploader(final HttpMultipartMode mode,
-                             final ProgressListener listener) {
-        super(mode);
-        this.listener = listener;
-    }
-
-    public MultiPartUploader(HttpMultipartMode mode, final String boundary,
-                             final Charset charset, final ProgressListener listener) {
-        super(mode, boundary, charset);
         this.listener = listener;
     }
 
