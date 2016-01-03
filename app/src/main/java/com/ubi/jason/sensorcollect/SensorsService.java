@@ -164,7 +164,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
             mNotifyManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
             mBuilder = new NotificationCompat.Builder(this);
             mBuilder.setContentTitle("Sensor Collection")
-                    .setContentText("Parado")
+                    .setContentText("A iniciar..")
                     .setContentIntent(pendingIntent)
                     .setSmallIcon(R.mipmap.ic_launcher);
             mBuilder.setColor(ContextCompat.getColor(this, R.color.green));
@@ -172,7 +172,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
             notification.flags = Notification.FLAG_ONGOING_EVENT;
             mNotifyManager.notify(1, notification);
         } else {
-            updateNotification("Parado");
+            updateNotification("A iniciar..");
         }
     }
 
@@ -239,20 +239,14 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
         if (serviceStatus != Config.SERVICE_STATUS_STOP) {
             if (sensors != null) {
                 sensors.stop();
-                notificationDone();
                 serviceStatus = Config.SERVICE_STATUS_STOP;
-                //fileWriter.closeFile();
-                // timers stop
-                /*if (updateEE != null) {
-                    updateEE.cancel();
-                    updateEE.purge();
-                }*/
                 if (updateTime != null) {
                     updateTime.cancel();
                     updateTime.purge();
                 }
                 UpdateListener.updateTime(0);
                 timestamp = 0;
+                notificationDone();
             }
             new DataUpload(this);
         }

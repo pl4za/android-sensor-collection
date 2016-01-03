@@ -12,6 +12,8 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
@@ -35,9 +37,12 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by jasoncosta on 12/1/2015.
@@ -156,11 +161,16 @@ public class DataUpload extends BroadcastReceiver {
      * Uploading the file to server
      */
     private class UploadFileToServer extends AsyncTask<Void, Integer, String> {
+
+        Timer updateTransfered;
+        long progress = 0;
+
         @Override
         protected void onPreExecute() {
             updateNotificationProgress(0);
             //Log.i(TAG, "Tamanho em Bytes: " + String.valueOf(filesToSend.get(i).length()));
             //Log.i(TAG, "Tamanho em KB: " + (filesToSend.get(i).length() / 1024) + "KB");
+            updateNotification("Ficheiro " + String.valueOf(i + 1) + " de " + filesToSend.size() + ". Tamanho: " + (filesToSend.get(i).length() / 1024) + "KB");
             super.onPreExecute();
         }
 
@@ -168,7 +178,6 @@ public class DataUpload extends BroadcastReceiver {
         protected void onProgressUpdate(Integer... progress) {
             // updating progress bar value
             updateNotificationProgress(progress[0]);
-            //updateNotification("Ficheiro " + String.valueOf(i + 1) + " de " + filesToSend.size() + ". Tamanho: " + (filesToSend.get(i).length() / 1024) + "KB");
         }
 
         @Override
@@ -182,14 +191,7 @@ public class DataUpload extends BroadcastReceiver {
             HttpClient httpclient = new DefaultHttpClient();
             HttpPost httppost = new HttpPost(Config.FILE_UPLOAD_URL);
             try {
-                MultiPartUploader entity = new MultiPartUploader(
-                        new MultiPartUploader.ProgressListener() {
-                            @Override
-                            public void transferred(long num) {
-                                Log.i(TAG, "Progress: " + progress + " - " + (int) ((num / (float) totalSize) * 100));
-                                publishProgress(((int) ((num / (float) totalSize) * 100)));
-                            }
-                        });
+                MultiPartUploader entity = new MultiPartUploader(new multiPartUploaderProgress(this));
                 File sourceFile = new File(filesToSend.get(i).getAbsolutePath());
                 // Adding file data to http body
                 entity.addPart("file", new FileBody(sourceFile));
@@ -274,15 +276,52 @@ public class DataUpload extends BroadcastReceiver {
                         Toast.LENGTH_LONG).show();
                 ERROR = true;
             }
+            if (updateTransfered != null) {
+                updateTransfered.cancel();
+                updateTransfered.purge();
+            }
             if (i < filesToSend.size() - 1) {
                 i++;
                 new UploadFileToServer().execute();
             } else {
+
                 if (ERROR) {
                     notificationError();
-                } else  {
+                } else {
                     notificationDone();
                 }
+            }
+        }
+
+        private class multiPartUploaderProgress implements MultiPartUploader.ProgressListener {
+
+            UploadFileToServer uploadFileToServer;
+
+            multiPartUploaderProgress(UploadFileToServer uploadFileToServer) {
+                this.uploadFileToServer = uploadFileToServer;
+            }
+
+            @Override
+            public void transferred(long num) {
+                progress = num;
+                if (updateTransfered==null) {
+                    updateTransfered = new Timer();
+                    updateTransfered.schedule(new updateTransfered(uploadFileToServer), 2000, 2000);
+                }
+            }
+        }
+
+        class updateTransfered extends TimerTask {
+
+            UploadFileToServer uploadFileToServer;
+
+            updateTransfered(UploadFileToServer uploadFileToServer) {
+                this.uploadFileToServer = uploadFileToServer;
+            }
+
+            public void run() {
+                Log.i(TAG, "Progress: " + progress + " - " + (int) ((progress / (float) totalSize) * 100));
+                uploadFileToServer.publishProgress(((int) ((progress / (float) totalSize) * 100)));
             }
         }
 
