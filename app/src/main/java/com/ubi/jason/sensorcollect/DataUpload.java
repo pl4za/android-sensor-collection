@@ -3,7 +3,6 @@ package com.ubi.jason.sensorcollect;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,8 +11,6 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
@@ -37,7 +34,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -47,7 +43,7 @@ import java.util.TimerTask;
 /**
  * Created by jasoncosta on 12/1/2015.
  */
-public class DataUpload extends BroadcastReceiver {
+public class DataUpload {
 
     private static Context context;
     private static final String TAG = "UPLOAD_RECEIVER";
@@ -65,16 +61,7 @@ public class DataUpload extends BroadcastReceiver {
     private static int progress = 0;
     private static int newProgress = 0;
 
-    public DataUpload() {
-    }
-
     public DataUpload(Context context) {
-        this.context = context;
-        instantiate();
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
         this.context = context;
         instantiate();
     }
@@ -304,7 +291,7 @@ public class DataUpload extends BroadcastReceiver {
             @Override
             public void transferred(long num) {
                 progress = num;
-                if (updateTransfered==null) {
+                if (updateTransfered == null) {
                     updateTransfered = new Timer();
                     updateTransfered.schedule(new updateTransfered(uploadFileToServer), 2000, 2000);
                 }

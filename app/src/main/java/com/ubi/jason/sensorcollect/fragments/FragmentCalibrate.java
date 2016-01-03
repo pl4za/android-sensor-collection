@@ -66,6 +66,7 @@ public class FragmentCalibrate extends Fragment implements CalibrationListener {
     public void calibrationDone() {
         Toast.makeText(getActivity(), "Calibrado !",
                 Toast.LENGTH_SHORT).show();
+        getActivity().onBackPressed();
     }
 
     private void createAnimation() {

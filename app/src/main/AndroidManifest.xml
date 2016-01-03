@@ -25,12 +25,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <!-- sync
+        <!-- sync -->
         <receiver android:name=".DataUpload">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
-        </receiver>-->
+        </receiver>
         <service
             android:name="com.ubi.jason.sensorcollect.SensorsService"
             android:exported="false" />
