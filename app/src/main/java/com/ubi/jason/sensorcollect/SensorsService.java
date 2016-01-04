@@ -19,6 +19,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.ubi.jason.sensorcollect.helper.Config;
 import com.ubi.jason.sensorcollect.interfaces.SensorListener;
@@ -26,7 +27,6 @@ import com.ubi.jason.sensorcollect.interfaces.ServiceControl;
 import com.ubi.jason.sensorcollect.interfaces.ServiceListener;
 
 import java.text.DecimalFormat;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -75,9 +75,12 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
         sensors = new Sensors(sensorManager);
         sensorMap = sensors.getAvailableSensors();
         fileWriter = new Files(this);
-        //fileWriter = new Files(this, sensorMap);
+        if (!fileWriter.hasFreeSpace()) {
+            Toast.makeText(getApplicationContext(), "Não tem espaço livre suficiente. São necessários 75MB livres.",
+                    Toast.LENGTH_LONG).show();
+        }
         serviceStatus = Config.SERVICE_STATUS_STOP;
-        PowerManager pm = (PowerManager)this.getSystemService(
+        PowerManager pm = (PowerManager) this.getSystemService(
                 Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         return new LocalBinder();
@@ -209,7 +212,8 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
 
     @Override
     public void startOrPause() {
-        if (serviceStatus==Config.SERVICE_STATUS_RUNNING) {
+        Log.i(TAG, "Pause");
+        if (serviceStatus == Config.SERVICE_STATUS_RUNNING) {
             if (sensors != null) {
                 sensors.stop();
                 notificationPause();
@@ -218,24 +222,30 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
                 updateTime.purge();
             }
         } else {
-            wl.acquire();
-            createNotification();
-            if (offset == null) {
-                getCalibrationValues();
+            if (fileWriter.hasFreeSpace()) {
+                wl.acquire();
+                createNotification();
+                if (offset == null) {
+                    getCalibrationValues();
+                }
+                // Now that we have a notification, we disalow android to kill the service
+                startForeground(serviceID, notification);
+                sensors.addOnChangedListener(this);
+                sensors.start(sensorMap);
+                serviceStatus = Config.SERVICE_STATUS_RUNNING;
+                //TODO: might not start at the same time as sensor events..
+                updateTime = new Timer();
+                updateTime.schedule(new updateTime(), 1000, 1000);
+            } else {
+                Toast.makeText(getApplicationContext(), "Não tem espaço livre suficiente. São necessários 75MB livres.",
+                        Toast.LENGTH_LONG).show();
             }
-            // Now that we have a notification, we disalow android to kill the service
-            startForeground(serviceID, notification);
-            sensors.addOnChangedListener(this);
-            sensors.start(sensorMap);
-            serviceStatus = Config.SERVICE_STATUS_RUNNING;
-            //TODO: might not start at the same time as sensor events..
-            updateTime = new Timer();
-            updateTime.schedule(new updateTime(), 1000, 1000);
         }
     }
 
     @Override
     public void stop() {
+        Log.i(TAG, "Stop");
         if (serviceStatus != Config.SERVICE_STATUS_STOP) {
             if (sensors != null) {
                 sensors.stop();
@@ -267,9 +277,10 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
 
     class updateTime extends TimerTask {
         DecimalFormat numberFormat = new DecimalFormat("#.00");
+
         public void run() {
             if (UpdateListener != null) {
-                updateNotification(numberFormat.format(filteredValues[0])+", "+numberFormat.format(filteredValues[1])+", "+numberFormat.format(filteredValues[2]));
+                updateNotification(numberFormat.format(filteredValues[0]) + ", " + numberFormat.format(filteredValues[1]) + ", " + numberFormat.format(filteredValues[2]));
                 Handler refresh = new Handler(Looper.getMainLooper());
                 refresh.post(new Runnable() {
                     public void run() {

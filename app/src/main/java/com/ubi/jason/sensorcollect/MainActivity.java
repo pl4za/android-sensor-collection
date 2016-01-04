@@ -7,7 +7,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -30,9 +29,6 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.jjoe64.graphview.GraphView;
-import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.LineGraphSeries;
 import com.ubi.jason.sensorcollect.fragments.FragmentCalibrate;
 import com.ubi.jason.sensorcollect.helper.Config;
 import com.ubi.jason.sensorcollect.helper.CustomDialog;
@@ -240,7 +236,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
 
     @Override
     public void stop() {
-        if (serviceControl!=null) {
+        if (serviceControl != null) {
             serviceControl.stop();
         }
     }

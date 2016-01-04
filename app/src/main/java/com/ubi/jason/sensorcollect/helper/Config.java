@@ -14,6 +14,8 @@ public class Config {
     public static final int SERVICE_STATUS_PAUSED = 1;
     public static final int SERVICE_STATUS_STOP = 2;
 
+    public static final int MIN_FREE_SPACE = 75;
+
     public static final int TIME_TO_CALIBRATE = 5;
 
 }

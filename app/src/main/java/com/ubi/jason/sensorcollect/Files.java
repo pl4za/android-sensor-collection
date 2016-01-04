@@ -1,10 +1,12 @@
 package com.ubi.jason.sensorcollect;
 
 import android.content.Context;
-import android.hardware.SensorEvent;
 import android.os.Build;
 import android.os.Environment;
+import android.os.StatFs;
 import android.util.Log;
+
+import com.ubi.jason.sensorcollect.helper.Config;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,15 +28,17 @@ public class Files {
     private static File mainFolder;
     private static File subFolder;
     private static File valuesFile;
+    private static boolean externalStorage;
 
     public Files(Context context) {
         this.context = context;
-        boolean externalStorage = isExternalStorageWritable();
-        CreateFolder(externalStorage);
+        externalStorage = isExternalStorageWritable();
+        CreateFolder();
     }
 
     //TODO: check free space
-    private void CreateFolder(boolean externalStorage) {
+    private void CreateFolder() {
+        Log.i(TAG, "Using external card: " + externalStorage);
         if (externalStorage) {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                 mainFolder = new File(Environment.getExternalStoragePublicDirectory(
@@ -128,5 +132,26 @@ public class Files {
 
             }
         }
+    }
+
+
+    public boolean hasFreeSpace() {
+        long blocksAvailable = 0;
+        long mbAvailable = 0;
+        StatFs stat;
+        if (externalStorage) {
+            stat = new StatFs(Environment.getExternalStorageDirectory().getPath());
+        } else {
+            stat = new StatFs(Environment.getDataDirectory().getPath());
+        }
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            blocksAvailable = stat.getAvailableBlocksLong();
+            mbAvailable = (blocksAvailable * stat.getBlockSizeLong()) / 1048576;
+        } else {
+            blocksAvailable = stat.getAvailableBlocks();
+            mbAvailable = (blocksAvailable * stat.getBlockSize()) / 1048576;
+        }
+        System.out.println("MB: " + mbAvailable);
+        return mbAvailable >= Config.MIN_FREE_SPACE;
     }
 }
