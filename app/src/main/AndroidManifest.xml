@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
         <!-- sync -->
-        <receiver android:name=".DataUpload">
+        <receiver android:name=".NetworkReceiver">
             <intent-filter>
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
