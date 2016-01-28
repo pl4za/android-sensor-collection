@@ -271,7 +271,6 @@ public class DataUpload {
                 i++;
                 new UploadFileToServer().execute();
             } else {
-
                 if (ERROR) {
                     notificationError();
                 } else {
@@ -365,7 +364,7 @@ public class DataUpload {
             mNotifyManager.notify(2, notification);
         } else {
             mBuilder.setContentTitle("Sensores UBI")
-                    .setContentText("A enviar dados recolhidos...");
+                    .setContentText("Enviado.");
             mBuilder.setColor(ContextCompat.getColor(context, R.color.green));
             notification = mBuilder.build();
             mNotifyManager.notify(2, notification);

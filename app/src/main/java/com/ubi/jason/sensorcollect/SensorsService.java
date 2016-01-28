@@ -134,7 +134,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
 
     private void notificationError() {
         mBuilder.setContentText("Ocorreu um erro");
-        mBuilder.setProgress(0, 1, false);
+        mBuilder.setProgress(0, 0, false);
         mBuilder.setColor(ContextCompat.getColor(this, R.color.red));
         notification = mBuilder.build();
         mNotifyManager.notify(1, notification);
@@ -151,10 +151,11 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     private void notificationDone() {
         if (mBuilder != null) {
             mBuilder.setContentText("Parado");
-            mBuilder.setProgress(0, 1, false);
+            mBuilder.setProgress(0, 0, false);
             mBuilder.setColor(ContextCompat.getColor(this, R.color.red));
             notification = mBuilder.build();
             mNotifyManager.notify(1, notification);
+           // mNotifyManager.cancel(1);
         }
     }
 
@@ -256,9 +257,9 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
                 }
                 UpdateListener.updateTime(0);
                 timestamp = 0;
-                notificationDone();
             }
             new DataUpload(this);
+            notificationDone();
         }
         if (wl.isHeld()) {
             wl.release();
