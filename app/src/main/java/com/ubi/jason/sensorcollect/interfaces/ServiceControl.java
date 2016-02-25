@@ -24,5 +24,7 @@ public interface ServiceControl {
      */
     int getStatus();
 
+    void error(String error);
+
     void openFragmentCalibrate();
 }

@@ -103,17 +103,19 @@ public class DataUpload {
         i = 0;
         filesToSend.clear();
         File sensorsFolder = getMainFolder();
-        File[] subFolders = sensorsFolder.listFiles();
-        for (File folder : subFolders) {
-            if (folder.isDirectory()) {
-                File[] files = folder.listFiles();
-                for (File file : files) {
-                    if (file.isFile()) {
-                        Log.i(TAG, file.getAbsolutePath() + ", size: " + file.length());
-                        if (file.length() > 0) {
-                            filesToSend.add(file);
-                        } else {
-                            file.delete();
+        if (sensorsFolder.exists()) {
+            File[] subFolders = sensorsFolder.listFiles();
+            for (File folder : subFolders) {
+                if (folder.isDirectory()) {
+                    File[] files = folder.listFiles();
+                    for (File file : files) {
+                        if (file.isFile()) {
+                            Log.i(TAG, file.getAbsolutePath() + ", size: " + file.length());
+                            if (file.length() > 0) {
+                                filesToSend.add(file);
+                            } else {
+                                file.delete();
+                            }
                         }
                     }
                 }

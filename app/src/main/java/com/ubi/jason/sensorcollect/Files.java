@@ -5,8 +5,10 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.ubi.jason.sensorcollect.helper.Config;
+import com.ubi.jason.sensorcollect.interfaces.ServiceControl;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -29,14 +31,15 @@ public class Files {
     private static File subFolder;
     private static File valuesFile;
     private static boolean externalStorage;
+    private ServiceControl serviceControl;
 
-    public Files(Context context) {
+    public Files(Context context, ServiceControl service) {
         this.context = context;
+        this.serviceControl = service;
         externalStorage = isExternalStorageWritable();
         CreateFolder();
     }
 
-    //TODO: check free space
     private void CreateFolder() {
         Log.i(TAG, "Using external card: " + externalStorage);
         if (externalStorage) {
@@ -118,8 +121,9 @@ public class Files {
             fileBuff.newLine();
             fileBuff.flush();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Toast.makeText(context, "A criar ficheiros...",
+                    Toast.LENGTH_LONG).show();
+            serviceControl.error("FileNotFound");
         }
     }
 

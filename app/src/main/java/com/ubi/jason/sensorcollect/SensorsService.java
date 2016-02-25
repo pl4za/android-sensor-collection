@@ -74,7 +74,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
         SensorManager sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         sensors = new Sensors(sensorManager);
         sensorMap = sensors.getAvailableSensors();
-        fileWriter = new Files(this);
+        fileWriter = new Files(this, this);
         if (!fileWriter.hasFreeSpace()) {
             Toast.makeText(getApplicationContext(), "Não tem espaço livre suficiente. São necessários 75MB livres.",
                     Toast.LENGTH_LONG).show();
@@ -155,7 +155,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
             mBuilder.setColor(ContextCompat.getColor(this, R.color.red));
             notification = mBuilder.build();
             mNotifyManager.notify(1, notification);
-           // mNotifyManager.cancel(1);
+            // mNotifyManager.cancel(1);
         }
     }
 
@@ -269,6 +269,18 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     @Override
     public int getStatus() {
         return serviceStatus;
+    }
+
+    @Override
+    public void error(String error) {
+        stop();
+        if (error.equals("FileNotFound")) {
+            fileWriter = new Files(this, this);
+            if (!fileWriter.hasFreeSpace()) {
+                Toast.makeText(getApplicationContext(), "Não tem espaço livre suficiente. São necessários 75MB livres.",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     @Override

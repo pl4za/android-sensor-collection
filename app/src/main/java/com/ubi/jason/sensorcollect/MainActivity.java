@@ -250,6 +250,11 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
         }
     }
 
+    @Override
+    public void error(String error) {
+        fragViewUpdate.updateStartToggleStatus(false);
+    }
+
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
