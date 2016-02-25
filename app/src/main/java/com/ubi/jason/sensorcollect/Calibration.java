@@ -37,7 +37,7 @@ public class Calibration implements SensorListener, CalibrationControl {
         SensorManager sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         sensors = new Sensors(sensorManager);
         this.context = context;
-        sensorMap = sensors.getAvailableSensors();
+        sensorMap = sensors.getAccelerometerSensors();
         calibrationListener = listener;
     }
 

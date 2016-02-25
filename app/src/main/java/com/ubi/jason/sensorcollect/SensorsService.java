@@ -74,7 +74,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
         SensorManager sensorManager = (SensorManager) this.getSystemService(Context.SENSOR_SERVICE);
         sensors = new Sensors(sensorManager);
         sensorMap = sensors.getAvailableSensors();
-        fileWriter = new Files(this);
+        fileWriter = new Files(this, sensorMap);
         if (!fileWriter.hasFreeSpace()) {
             Toast.makeText(getApplicationContext(), "Não tem espaço livre suficiente. São necessários 75MB livres.",
                     Toast.LENGTH_LONG).show();
@@ -155,7 +155,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
             mBuilder.setColor(ContextCompat.getColor(this, R.color.red));
             notification = mBuilder.build();
             mNotifyManager.notify(1, notification);
-           // mNotifyManager.cancel(1);
+            // mNotifyManager.cancel(1);
         }
     }
 
@@ -185,14 +185,29 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
      */
     @Override
     public void onSensorChanged(SensorEvent event) {
+        Log.i(TAG, "Sensor: " + event.sensor.getType());
         //Log.i(TAG, event.sensor.getType() + ": x: " + String.valueOf(event.values[0]) + " y: " + String.valueOf(event.values[1]) + " z: " + String.valueOf(event.values[2]));
-        //fileWriter.writeSensorData(event);
-        if (event.values[0] < event.sensor.getMaximumRange()) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             currentValues = new float[]{event.values[0], event.values[1], event.values[2]};
             filteredValues = new float[]{event.values[0] - offset[0], event.values[1] - offset[1], event.values[2] - offset[2]};
-            fileWriter.writeSensorData(filteredValues);
-            //Log.i(TAG, "Calibrado: " + filteredValues[0] + ", " + filteredValues[1] + ", " + filteredValues[2]);
+            fileWriter.writeSensorData(event.sensor.getType(), filteredValues);
+        } else if (event.sensor.getType() == Sensor.TYPE_LINEAR_ACCELERATION) {
+            fileWriter.writeSensorData(event.sensor.getType(), new float[]{event.values[0], event.values[1], event.values[2]});
+        } else if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+            fileWriter.writeSensorData(event.sensor.getType(), new float[]{event.values[0], event.values[1], event.values[2]});
         }
+        //Environment sensors
+        else if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
+            fileWriter.writeSensorData(event.sensor.getType(), new float[]{event.values[0]});
+        } else if (event.sensor.getType() == Sensor.TYPE_PRESSURE) {
+            fileWriter.writeSensorData(event.sensor.getType(), new float[]{event.values[0]});
+        } else if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            fileWriter.writeSensorData(event.sensor.getType(), new float[]{event.values[0]});
+        }
+        //currentValues = new float[]{event.values[0], event.values[1], event.values[2]};
+        //filteredValues = new float[]{event.values[0] - offset[0], event.values[1] - offset[1], event.values[2] - offset[2]};
+        //fileWriter.writeSensorData(filteredValues);
+        //Log.i(TAG, "Calibrado: " + filteredValues[0] + ", " + filteredValues[1] + ", " + filteredValues[2]);
     }
 
     private void getCalibrationValues() {
@@ -281,7 +296,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
 
         public void run() {
             if (UpdateListener != null) {
-                updateNotification(numberFormat.format(filteredValues[0]) + ", " + numberFormat.format(filteredValues[1]) + ", " + numberFormat.format(filteredValues[2]));
+                //TODO: updateNotification(numberFormat.format(filteredValues[0]) + ", " + numberFormat.format(filteredValues[1]) + ", " + numberFormat.format(filteredValues[2]));
                 Handler refresh = new Handler(Looper.getMainLooper());
                 refresh.post(new Runnable() {
                     public void run() {

@@ -1,6 +1,7 @@
 package com.ubi.jason.sensorcollect;
 
 import android.content.Context;
+import android.hardware.Sensor;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
@@ -16,6 +17,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by jason on 17-Nov-15.
@@ -27,17 +30,25 @@ public class Files {
     private static BufferedWriter fileBuff;
     private static File mainFolder;
     private static File subFolder;
-    private static File valuesFile;
+    private static Map <Integer, File> filesMap;
     private static boolean externalStorage;
+    private Map<String, Sensor> sensorMap;
 
     public Files(Context context) {
         this.context = context;
         externalStorage = isExternalStorageWritable();
-        CreateFolder();
+        createFolder();
+    }
+
+    public Files(Context context, Map<String, Sensor> sensorMap) {
+        this.context = context;
+        externalStorage = isExternalStorageWritable();
+        this.sensorMap = sensorMap;
+        createFolder();
     }
 
     //TODO: check free space
-    private void CreateFolder() {
+    private void createFolder() {
         Log.i(TAG, "Using external card: " + externalStorage);
         if (externalStorage) {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
@@ -64,7 +75,6 @@ public class Files {
     }
 
     private void createSubFolders() {
-        // One directory per sensor (only available sensors)
         subFolder = new File(mainFolder, "values");
         if (!subFolder.isDirectory()) {
             if (!subFolder.mkdirs()) {
@@ -82,22 +92,26 @@ public class Files {
         Date date = Calendar.getInstance().getTime();
         DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
         String today = formatter.format(date);
-        // One file per day
-        valuesFile = new File(subFolder, today.toString() + ".csv");
-        if (!valuesFile.isFile()) {
-            Log.i(TAG, "Creating file: " + valuesFile + " in " + subFolder);
-            try {
-                if (!valuesFile.createNewFile()) {
-                    Log.i(TAG, valuesFile + " file not created");
-                } else {
-                    Log.i(TAG, valuesFile + " file created");
+        // One file per sensor per day
+        filesMap = new HashMap<>();
+        for (Map.Entry<String, Sensor> s : sensorMap.entrySet()) {
+            File valuesFile = new File(subFolder, s.getKey()+"_"+today.toString() + ".csv");
+            filesMap.put(s.getValue().getType(), valuesFile);
+            if (!valuesFile.isFile()) {
+                Log.i(TAG, "Creating file: " + valuesFile + " in " + subFolder);
+                try {
+                    if (!valuesFile.createNewFile()) {
+                        Log.i(TAG, valuesFile + " file not created");
+                    } else {
+                        Log.i(TAG, valuesFile + " file created");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+            } else {
+                Log.i(TAG, "Using file: " + valuesFile.getAbsolutePath());
+                // We dont create the header because it already exists
             }
-        } else {
-            Log.i(TAG, "Using file: " + valuesFile.getAbsolutePath());
-            // We dont create the header because it already exists
         }
     }
 
@@ -110,15 +124,17 @@ public class Files {
         return false;
     }
 
-    public void writeSensorData(float[] event) {
+    public void writeSensorData(int sensorType, float[] event) {
         try {
             //Log.i(TAG, event.sensor.getName().replace(" ", "_").toString());
-            fileBuff = new BufferedWriter(new FileWriter(valuesFile, true));
-            fileBuff.append(Float.toString(event[0]) + "," + Float.toString(event[1]) + "," + Float.toString(event[2]) + "," + System.currentTimeMillis());
+            fileBuff = new BufferedWriter(new FileWriter(filesMap.get(sensorType), true));
+            for (Float f : event) {
+                fileBuff.append(Float.toString(f));
+            }
+            fileBuff.append(String.valueOf(System.currentTimeMillis()));
             fileBuff.newLine();
             fileBuff.flush();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -133,7 +149,6 @@ public class Files {
             }
         }
     }
-
 
     public boolean hasFreeSpace() {
         long blocksAvailable = 0;
