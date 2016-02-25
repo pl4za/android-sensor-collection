@@ -1,7 +1,6 @@
 package com.ubi.jason.sensorcollect;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
@@ -9,6 +8,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.ubi.jason.sensorcollect.delegators.SettingsCtrl;
 import com.ubi.jason.sensorcollect.helper.Config;
 import com.ubi.jason.sensorcollect.interfaces.CalibrationControl;
 import com.ubi.jason.sensorcollect.interfaces.CalibrationListener;
@@ -26,24 +26,25 @@ public class Calibration implements SensorListener, CalibrationControl {
     private static final String TAG = "CALIBRATION";
     private static int timeToCalibrate = Config.TIME_TO_CALIBRATE;
     private static float[] currentValues;
-    private static float[] offset;
-    private static Context context;
     private static Timer calibrateTime;
-    private static CalibrationListener calibrationListener;
     private static Sensors sensors;
     private static Map<String, Sensor> sensorMap;
+    private static CalibrationListener calibrationListener;
+    /*
+    Class delegators
+    */
+    private static SettingsCtrl settingsCtrl = SettingsCtrl.getInstance();
 
-    public Calibration(Context context, CalibrationListener listener) {
+    public Calibration(Context context, CalibrationListener calibrationListener) {
         SensorManager sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         sensors = new Sensors(sensorManager);
-        this.context = context;
         sensorMap = sensors.getAvailableSensors();
-        calibrationListener = listener;
+        this.calibrationListener = calibrationListener;
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        Log.i(TAG, "x: " + String.valueOf(event.values[0]) + " y: " + String.valueOf(event.values[1]) + " z: " + String.valueOf(event.values[2]));
+        //Log.i(TAG, "x: " + String.valueOf(event.values[0]) + " y: " + String.valueOf(event.values[1]) + " z: " + String.valueOf(event.values[2]));
         currentValues = new float[]{event.values[0], event.values[1], event.values[2]};
         if ((event.values[0] < 0.5 && event.values[0] > -0.5) && //X
                 (event.values[1] < 0.5 && event.values[1] > -0.5) && //Y
@@ -71,16 +72,12 @@ public class Calibration implements SensorListener, CalibrationControl {
 
     @Override
     public void startCalibrate() {
-        // Ask user to place on surface
-        offset = null;
         sensors.addOnChangedListener(this);
         sensors.start(sensorMap);
     }
 
     @Override
     public void stopCalibrate() {
-        // Ask user to place on surface
-        offset = null;
         sensors.stop();
         if (calibrateTime != null) {
             calibrateTime.cancel();
@@ -90,26 +87,12 @@ public class Calibration implements SensorListener, CalibrationControl {
         timeToCalibrate = Config.TIME_TO_CALIBRATE;
     }
 
-    private void setCalibrationValues() {
-        SharedPreferences sharedPref = context.getSharedPreferences(context.getResources().getString(R.string.offset), 0);
-        offset = new float[3];
-        offset[0] = currentValues[0] + (float) 0.10;
-        offset[1] = currentValues[1] + (float) 0.10;
-        offset[2] = currentValues[2] - (float) 9.81;
-        Log.i(TAG, "Offset from sensor: " + offset[0] + ", " + offset[1] + ", " + offset[2]);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putFloat("x", offset[0]);
-        editor.putFloat("y", offset[1]);
-        editor.putFloat("z", offset[2]);
-        editor.commit();
-    }
-
     class calibrateTime extends TimerTask {
         public void run() {
             if (--timeToCalibrate == 0) {
                 sensors.stop();
                 if (calibrateTime != null) {
-                    setCalibrationValues();
+                    settingsCtrl.setCalibrationValues(currentValues);
                     calibrateTime.cancel();
                     calibrateTime.purge();
                     calibrateTime = null;

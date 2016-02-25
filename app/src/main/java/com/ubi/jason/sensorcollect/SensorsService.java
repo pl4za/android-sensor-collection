@@ -21,10 +21,10 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.ubi.jason.sensorcollect.delegators.ViewCtrl;
 import com.ubi.jason.sensorcollect.helper.Config;
 import com.ubi.jason.sensorcollect.interfaces.SensorListener;
-import com.ubi.jason.sensorcollect.interfaces.ServiceControl;
-import com.ubi.jason.sensorcollect.interfaces.ServiceListener;
+import com.ubi.jason.sensorcollect.interfaces.ServiceOptions;
 
 import java.text.DecimalFormat;
 import java.util.Map;
@@ -34,7 +34,7 @@ import java.util.TimerTask;
 /**
  * Created by jasoncosta on 11/30/2015.
  */
-public class SensorsService extends Service implements SensorListener, ServiceControl {
+public class SensorsService extends Service implements SensorListener, ServiceOptions {
 
     private static final String TAG = "SENSOR_SERVICE";
     // Notification
@@ -43,7 +43,6 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     private NotificationCompat.Builder mBuilder;
     private Files fileWriter;
     // Classes
-    private ServiceListener UpdateListener;
     private Map<String, Sensor> sensorMap;
     private Sensors sensors;
     // Other
@@ -55,10 +54,10 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
     private static float[] filteredValues;
     private Timer updateTime;
     private PowerManager.WakeLock wl;
-
-    public void registerListener(ServiceListener listener) {
-        UpdateListener = listener;
-    }
+    /*
+    Class delegators
+    */
+    private static ViewCtrl viewCtrl = ViewCtrl.getInstance();
 
     public class LocalBinder extends Binder {
         SensorsService getService() {
@@ -118,7 +117,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
                 updateTime.cancel();
                 updateTime.purge();
             }
-            UpdateListener.updateTime(0);
+            viewCtrl.updateTimestamp(0);
             timestamp = 0;
         }
     }
@@ -255,7 +254,7 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
                     updateTime.cancel();
                     updateTime.purge();
                 }
-                UpdateListener.updateTime(0);
+                viewCtrl.updateTimestamp(0);
                 timestamp = 0;
             }
             new DataUpload(this);
@@ -283,21 +282,16 @@ public class SensorsService extends Service implements SensorListener, ServiceCo
         }
     }
 
-    @Override
-    public void openFragmentCalibrate() {
-
-    }
-
     class updateTime extends TimerTask {
         DecimalFormat numberFormat = new DecimalFormat("#.00");
 
         public void run() {
-            if (UpdateListener != null) {
+            if (viewCtrl != null) {
                 updateNotification(numberFormat.format(filteredValues[0]) + ", " + numberFormat.format(filteredValues[1]) + ", " + numberFormat.format(filteredValues[2]));
                 Handler refresh = new Handler(Looper.getMainLooper());
                 refresh.post(new Runnable() {
                     public void run() {
-                        UpdateListener.updateTime(timestamp);
+                        viewCtrl.updateTimestamp(timestamp);
                     }
                 });
             }

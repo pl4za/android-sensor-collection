@@ -34,26 +34,13 @@ public class Sensors implements SensorEventListener {
 
     public Map<String, Sensor> getAvailableSensors() {
         Map<String, Sensor> sensorMap = new HashMap<String, Sensor>();
-        /*if (mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION) != null) {
-            List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_LINEAR_ACCELERATION);
-            for (Sensor s : sensorList) {
-                Log.i(TAG, "Sensor: " + s.getVendor());
-                sensorMap.put("sensorLinear", s);
-            }
-        }*/ if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
+        if (mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null) {
             List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_ACCELEROMETER);
             for (Sensor s : sensorList) {
                 Log.i(TAG, "Sensor: " + s.getVendor()+" Maximum range: "+s.getMaximumRange());
                 sensorMap.put("sensorAcce", s);
             }
-        }/* if (mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) != null) {
-            List<Sensor> sensorList = mSensorManager.getSensorList(Sensor.TYPE_GYROSCOPE);
-            for (Sensor s : sensorList) {
-                Log.i(TAG, "Sensor: " + s.getVendor());
-                sensorMap.put("sensorGyro", s);
-            }
-        }*/
-        Log.i(TAG, "SensorMap size: " + sensorMap.size());
+        }
         return sensorMap;
     }
 

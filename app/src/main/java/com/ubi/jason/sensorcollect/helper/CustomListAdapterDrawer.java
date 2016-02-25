@@ -51,7 +51,6 @@ public class CustomListAdapterDrawer extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.i(TAG, "Posição: " + position);
         if (inflater == null) {
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
