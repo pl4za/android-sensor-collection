@@ -5,9 +5,10 @@ package com.ubi.jason.sensorcollect.helper;
  */
 public class Config {
     // File upload url (replace the ip with your server address)
-    //public static final String FILE_UPLOAD_URL = "http://192.168.42.11/sensorsDataTese/fileUpload.php";
-    public static final String FILE_UPLOAD_URL = "http://192.168.209.19/sensorsDataTese/fileUpload.php";
-    //public static final String FILE_UPLOAD_URL = "http://193.126.80.249/sensorsDataTese/fileUpload.php";
+    // LOCAL
+    //public static final String FILE_UPLOAD_URL = "http://192.168.209.19/sensorsDataTese/fileUpload.php";
+    // SOCIA
+    public static final String FILE_UPLOAD_URL = "http://193.136.67.246/~jason/sensorsDataTese/fileUpload.php";
 
     //Service
     public static final int SERVICE_STATUS_RUNNING = 0;
