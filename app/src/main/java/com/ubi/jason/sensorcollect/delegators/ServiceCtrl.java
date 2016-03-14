@@ -39,12 +39,12 @@ public class ServiceCtrl implements ServiceOptions {
             } else {
                 activityCtrl.showToast("É necessário calibrar");
                 activityCtrl.calibrate();
-                viewCtrl.updateStartButton(false);
+                viewCtrl.updateStartToggleStatus(false);
             }
         } else {
             activityCtrl.showToast("Por favor complete os seus dados");
             activityCtrl.openDrawer();
-            viewCtrl.updateStartButton(false);
+            viewCtrl.updateStartToggleStatus(false);
         }
     }
 

@@ -117,7 +117,7 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
                 updateTime.cancel();
                 updateTime.purge();
             }
-            viewCtrl.updateTimestamp(0);
+            viewCtrl.updateViewTime(0);
             timestamp = 0;
         }
     }
@@ -254,7 +254,7 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
                     updateTime.cancel();
                     updateTime.purge();
                 }
-                viewCtrl.updateTimestamp(0);
+                viewCtrl.updateViewTime(0);
                 timestamp = 0;
             }
             new DataUpload(this);
@@ -291,7 +291,7 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
                 Handler refresh = new Handler(Looper.getMainLooper());
                 refresh.post(new Runnable() {
                     public void run() {
-                        viewCtrl.updateTimestamp(timestamp);
+                        viewCtrl.updateViewTime(timestamp);
                     }
                 });
             }

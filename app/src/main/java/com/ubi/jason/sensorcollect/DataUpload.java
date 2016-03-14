@@ -17,6 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.ubi.jason.sensorcollect.delegators.ServiceCtrl;
 import com.ubi.jason.sensorcollect.helper.Config;
 import com.ubi.jason.sensorcollect.helper.MultiPartUploader;
 
@@ -59,6 +60,11 @@ public class DataUpload {
     private static String android_id;
     private static boolean ERROR = false;
 
+    /*
+    Class delegators
+     */
+    private static ServiceCtrl serviceCtrl = ServiceCtrl.getInstance();
+
     public DataUpload(Context context) {
         this.context = context;
         instantiate();
@@ -69,11 +75,13 @@ public class DataUpload {
             setFilesToSend();
             setUserInfoToSend();
             if (!filesToSend.isEmpty()) {
-                Log.i(TAG, "Sending collected data");
-                android_id = Settings.Secure.getString(context.getContentResolver(),
-                        Settings.Secure.ANDROID_ID);
-                createNotificationProgress();
-                new UploadFileToServer().execute();
+                if (serviceCtrl == null || serviceCtrl.getStatus() == Config.SERVICE_STATUS_STOP){
+                    Log.i(TAG, "Sending collected data");
+                    android_id = Settings.Secure.getString(context.getContentResolver(),
+                            Settings.Secure.ANDROID_ID);
+                    createNotificationProgress();
+                    new UploadFileToServer().execute();
+                }
             }
         }
     }
