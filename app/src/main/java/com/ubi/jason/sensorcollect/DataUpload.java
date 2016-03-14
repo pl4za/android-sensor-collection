@@ -58,8 +58,6 @@ public class DataUpload {
     private static int i = 0;
     private static String android_id;
     private static boolean ERROR = false;
-    private static int progress = 0;
-    private static int newProgress = 0;
 
     public DataUpload(Context context) {
         this.context = context;

@@ -8,7 +8,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.ubi.jason.sensorcollect.helper.Config;
-import com.ubi.jason.sensorcollect.interfaces.ServiceControl;
+import com.ubi.jason.sensorcollect.interfaces.ServiceOptions;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -31,9 +31,9 @@ public class Files {
     private static File subFolder;
     private static File valuesFile;
     private static boolean externalStorage;
-    private ServiceControl serviceControl;
+    private ServiceOptions serviceControl;
 
-    public Files(Context context, ServiceControl service) {
+    public Files(Context context, ServiceOptions service) {
         this.context = context;
         this.serviceControl = service;
         externalStorage = isExternalStorageWritable();

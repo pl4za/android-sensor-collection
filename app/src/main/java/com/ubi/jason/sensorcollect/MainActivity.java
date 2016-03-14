@@ -29,41 +29,50 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.ubi.jason.sensorcollect.delegators.ActivityCtrl;
+import com.ubi.jason.sensorcollect.delegators.ServiceCtrl;
+import com.ubi.jason.sensorcollect.delegators.SettingsCtrl;
+import com.ubi.jason.sensorcollect.delegators.StatusCtrl;
 import com.ubi.jason.sensorcollect.fragments.FragmentCalibrate;
 import com.ubi.jason.sensorcollect.helper.Config;
 import com.ubi.jason.sensorcollect.helper.CustomDialog;
 import com.ubi.jason.sensorcollect.helper.CustomListAdapterDrawer;
+import com.ubi.jason.sensorcollect.interfaces.ActivityOptions;
 import com.ubi.jason.sensorcollect.interfaces.DialogListener;
-import com.ubi.jason.sensorcollect.interfaces.FragmentEEViewUpdate;
-import com.ubi.jason.sensorcollect.interfaces.ServiceControl;
-import com.ubi.jason.sensorcollect.interfaces.ServiceListener;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements DialogListener, ServiceListener, ServiceControl {
+public class MainActivity extends AppCompatActivity implements DialogListener, ActivityOptions {
 
     private static final String TAG = "MAIN_ACT";
     static final int DIALOG_OK = -1;
     static final int DIALOG_CANCEL = -2;
     private static boolean START_COMMAND = false;
-    private static boolean INFO_COMPLETE = true;
-    // Service
     private boolean mBound = false;
-    private ServiceControl serviceControl;
     private SensorsService sensorsService;
     private Intent serviceIntent;
-    private FragmentEEViewUpdate fragViewUpdate;
+    static final int DRAWER_DELAY = 200;
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
+    private ListView drawerList;
+    private static String appTitle;
+    private ArrayList<String> drawerValues;
+    /*
+    Class delegators
+     */
+    private static ServiceCtrl serviceCtrl = ServiceCtrl.getInstance();
+    private static StatusCtrl statusCtrl = StatusCtrl.getInstance();
+
     private final ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             Log.i(TAG, "onServiceConnected");
             SensorsService.LocalBinder binder = (SensorsService.LocalBinder) service;
             sensorsService = binder.getService();
-            sensorsService.registerListener(MainActivity.this);
-            addOnChangedListener(sensorsService);
             mBound = true;
             if (START_COMMAND) {
-                startOrPause();
+                serviceCtrl.startOrPause();
             }
+            serviceCtrl.setService(sensorsService);
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -71,17 +80,6 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
             mBound = false;
         }
     };
-    // Delay is in milliseconds
-    static final int DRAWER_DELAY = 200;
-    private DrawerLayout drawerLayout;
-    private ActionBarDrawerToggle drawerToggle;
-    private ListView drawerList;
-    private static String appTitle;
-    private ArrayList<String> drawerValues;
-
-    public void addOnChangedListener(ServiceControl listener) {
-        serviceControl = listener;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,7 +105,8 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
             }
         };
         drawerLayout.setDrawerListener(drawerToggle);
-        // Drawer content
+        ActivityCtrl.getInstance().setActivity(this);
+        SettingsCtrl.getInstance().setContext(this);
         updateDrawerContent();
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -118,7 +117,16 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
     public void onResume() {
         Log.i(TAG, "onResume");
         if (!mBound) {
-            startService();
+            Log.i(TAG, "startService");
+            if (sensorsService == null) {
+                serviceIntent = new Intent(this, SensorsService.class);
+                startService(serviceIntent);
+                bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+            } else {
+                if (START_COMMAND) {
+                    serviceCtrl.startOrPause();
+                }
+            }
         }
         super.onResume();
     }
@@ -135,19 +143,6 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
             mBound = false;
         }
         START_COMMAND = false;
-    }
-
-    private void startService() {
-        Log.i(TAG, "startService");
-        if (sensorsService == null) {
-            serviceIntent = new Intent(this, SensorsService.class);
-            startService(serviceIntent);
-            bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
-        } else {
-            if (START_COMMAND) {
-                startOrPause();
-            }
-        }
     }
 
     private void updateDrawerContent() {
@@ -167,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
                 break;
             }
         }
-        INFO_COMPLETE = tempComplete;
+        statusCtrl.setINFO_COMPLETE(tempComplete);
         TypedArray drawerIcons = getResources().obtainTypedArray(R.array.drawer_icons);
         BaseAdapter adapter = new CustomListAdapterDrawer(this, drawerItems, drawerValues, drawerIcons);
         drawerList.setAdapter(adapter);
@@ -216,43 +211,24 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
     }
 
     @Override
-    public void startOrPause() {
-        if (INFO_COMPLETE) {
-            if (isCalibrated()) {
-                serviceControl.startOrPause();
-            } else {
-                Toast.makeText(this, "É necessário calibrar.",
-                        Toast.LENGTH_SHORT).show();
-                openFragmentCalibrate();
-                fragViewUpdate.updateStartToggleStatus(false);
-            }
-        } else {
-            new Handler().postDelayed(openDrawerRunnable(), 0);
-            Toast.makeText(this, "Por favor complete os seus dados",
-                    Toast.LENGTH_LONG).show();
-            fragViewUpdate.updateStartToggleStatus(false);
-        }
+    public void showToast(String text) {
+        Toast.makeText(this, text,
+                Toast.LENGTH_LONG).show();
     }
 
     @Override
-    public void stop() {
-        if (serviceControl != null) {
-            serviceControl.stop();
-        }
+    public void calibrate() {
+        FragmentCalibrate f = new FragmentCalibrate();
+        FragmentManager fm = getSupportFragmentManager(); //or getFragmentManager() if you are not using support library.
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.replace(R.id.container, f);
+        ft.addToBackStack("fragmentCalibrate");
+        ft.commit();
     }
 
     @Override
-    public int getStatus() {
-        if (serviceControl == null) {
-            return 2;
-        } else {
-            return serviceControl.getStatus();
-        }
-    }
-
-    @Override
-    public void error(String error) {
-        fragViewUpdate.updateStartToggleStatus(false);
+    public void openDrawer() {
+        new Handler().postDelayed(openDrawerRunnable(), 0);
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -263,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.ubi.pt"));
                 startActivity(browserIntent);
             } else {
-                if (getStatus() == Config.SERVICE_STATUS_STOP) {
+                if (serviceCtrl.getStatus() == Config.SERVICE_STATUS_STOP) {
                     createDialog(position);
                 } else {
                     Toast.makeText(getApplicationContext(), "Monitorização em progresso.",
@@ -332,29 +308,6 @@ public class MainActivity extends AppCompatActivity implements DialogListener, S
             drawerLayout.openDrawer(Gravity.LEFT);
             return true;
         }
-    }
-
-    public void registerFragmentListener(FragmentEEViewUpdate fragment) {
-        this.fragViewUpdate = fragment;
-    }
-
-    public void openFragmentCalibrate() {
-        FragmentCalibrate f = new FragmentCalibrate();
-        FragmentManager fm = getSupportFragmentManager(); //or getFragmentManager() if you are not using support library.
-        FragmentTransaction ft = fm.beginTransaction();
-        ft.replace(R.id.container, f);
-        ft.addToBackStack("fragmentCalibrate");
-        ft.commit();
-    }
-
-    @Override
-    public void updateTime(int timestamp) {
-        fragViewUpdate.updateViewTime(timestamp);
-    }
-
-    public boolean isCalibrated() {
-        SharedPreferences sharedPref = this.getSharedPreferences(getResources().getString(R.string.offset), 0);
-        return (sharedPref.contains("x") && sharedPref.contains("y") && sharedPref.contains("z"));
     }
 
 }

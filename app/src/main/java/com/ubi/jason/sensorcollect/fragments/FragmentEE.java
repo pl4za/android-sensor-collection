@@ -1,6 +1,5 @@
 package com.ubi.jason.sensorcollect.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,28 +10,30 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.ubi.jason.sensorcollect.MainActivity;
 import com.ubi.jason.sensorcollect.R;
+import com.ubi.jason.sensorcollect.delegators.ActivityCtrl;
+import com.ubi.jason.sensorcollect.delegators.ViewCtrl;
 import com.ubi.jason.sensorcollect.helper.Config;
-import com.ubi.jason.sensorcollect.interfaces.FragmentEEViewUpdate;
-import com.ubi.jason.sensorcollect.interfaces.ServiceControl;
-
-import java.text.DecimalFormat;
+import com.ubi.jason.sensorcollect.delegators.ServiceCtrl;
+import com.ubi.jason.sensorcollect.interfaces.FragmentView;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class FragmentEE extends Fragment implements View.OnClickListener, FragmentEEViewUpdate {
+public class FragmentEE extends Fragment implements View.OnClickListener, FragmentView {
 
-    private static final String TAG = "MAIN_FRAG";
+    private static final String TAG = "FRAG_EE";
     private ToggleButton tglTrack;
     private Button btnStop, btnCalibrate;
     private TextView tvTime;
     private View view;
-    private static Context context;
+    /*
+    Class delegators
+     */
+    private ActivityCtrl activityCtrl = ActivityCtrl.getInstance();
+    private ServiceCtrl serviceCtrl = ServiceCtrl.getInstance();
 
     public FragmentEE() {
     }
@@ -42,16 +43,15 @@ public class FragmentEE extends Fragment implements View.OnClickListener, Fragme
                              Bundle savedInstanceState) {
         Log.i(TAG, "onCreateView");
         view = inflater.inflate(R.layout.fragment_main, container, false);
-        context = getContext();
         setButtonListeners();
+        ViewCtrl.getInstance().setView(this);
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        ((MainActivity)getActivity()).registerFragmentListener(this);
-        int status = ((MainActivity)getActivity()).getStatus();
+        int status = serviceCtrl.getStatus();
         tglTrack.setChecked(status == Config.SERVICE_STATUS_RUNNING);
     }
 
@@ -76,12 +76,12 @@ public class FragmentEE extends Fragment implements View.OnClickListener, Fragme
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.tglTrack) {
-            ((ServiceControl)getActivity()).startOrPause();
+            serviceCtrl.startOrPause();
         } else if (id == R.id.btnStop) {
-            ((ServiceControl)getActivity()).stop();
+            serviceCtrl.stop();
             tglTrack.setChecked(false);
         } else if (id == R.id.btnCalibrate) {
-            ((ServiceControl)getActivity()).openFragmentCalibrate();
+            activityCtrl.calibrate();
         }
     }
 
@@ -94,6 +94,5 @@ public class FragmentEE extends Fragment implements View.OnClickListener, Fragme
     public void updateStartToggleStatus(boolean status) {
         tglTrack.setChecked(status);
     }
-
 
 }
