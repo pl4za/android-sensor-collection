@@ -131,11 +131,15 @@ public class DataUpload {
 
     public void setUserInfoToSend() {
         userInfoToSend.clear();
+        DataEncryptRSA dataEncrypt = new DataEncryptRSA();
+        //String message = dataEncrypt.encrypt("jason");
         String userInfoKeys[] = context.getResources().getStringArray(R.array.user_info_keys);
         SharedPreferences sharedPref = context.getSharedPreferences(context.getResources().getString(R.string.preference), 0);
         for (String a : userInfoKeys) {
-            Log.i(TAG, "Got: " + sharedPref.getString(a, ""));
-            userInfoToSend.put(a, sharedPref.getString(a, ""));
+            String encryptedUserInf = dataEncrypt.encrypt(sharedPref.getString(a, ""));
+            Log.i(TAG, "UserInf: " + sharedPref.getString(a, ""));
+            Log.i(TAG, "UserInfEncrypted: " + encryptedUserInf);
+            userInfoToSend.put(a, encryptedUserInf);
         }
     }
 
