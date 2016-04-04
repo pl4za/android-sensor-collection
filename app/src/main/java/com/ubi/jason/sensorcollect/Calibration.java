@@ -30,6 +30,9 @@ public class Calibration implements SensorListener, CalibrationControl {
     private static Sensors sensors;
     private static Map<String, Sensor> sensorMap;
     private static CalibrationListener calibrationListener;
+    private static float hOffset = 2f;
+    private static float maxVOffset = 12f;
+    private static float minVOffset = 6f;
     /*
     Class delegators
     */
@@ -46,9 +49,9 @@ public class Calibration implements SensorListener, CalibrationControl {
     public void onSensorChanged(SensorEvent event) {
         //Log.i(TAG, "x: " + String.valueOf(event.values[0]) + " y: " + String.valueOf(event.values[1]) + " z: " + String.valueOf(event.values[2]));
         currentValues = new float[]{event.values[0], event.values[1], event.values[2]};
-        if ((event.values[0] < 0.5 && event.values[0] > -0.5) && //X
-                (event.values[1] < 0.5 && event.values[1] > -0.5) && //Y
-                (event.values[2] < 10.5 && event.values[2] > 4)) { //Z TODO: Tablet deco reports very bad values. DEFAULT: 8.5
+        if ((event.values[0] < hOffset && event.values[0] > -hOffset) && //X
+                (event.values[1] < hOffset && event.values[1] > -hOffset) && //Y
+                (event.values[2] < maxVOffset && event.values[2] > minVOffset)) { //Z TODO: Tablet deco reports very bad values. DEFAULT: 8.5
             if (calibrateTime == null) {
                 calibrateTime = new Timer();
                 calibrateTime.schedule(new calibrateTime(), 0, 1000); //Countdowns from 5 and resets if device moves

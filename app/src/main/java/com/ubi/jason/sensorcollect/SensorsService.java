@@ -86,8 +86,14 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
     }
 
     @Override
+    public boolean onUnbind(Intent intent) {
+        Log.i(TAG, "onUnbind");
+        return super.onUnbind(intent);
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "onStartCommand: " + flags);
+        Log.i(TAG, "onStartCommand: " + flags + "\nStart id: " +startId);
         this.serviceID = startId;
         if (flags == START_FLAG_REDELIVERY) {
             /***
@@ -95,8 +101,10 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
              * The service had previously returned START_REDELIVER_INTENT but had been killed before calling stopSelf(int) for that Intent.
              */
             Log.i(TAG, "START_FLAG_REDELIVERY = TRUE");
-            //start();
+            startOrPause();
         }
+        viewCtrl.updateViewTime(timestamp);
+        Log.i(TAG, "TEMPO: " + timestamp);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -107,12 +115,6 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
             sensors.stop();
             notificationDone();
             serviceStatus = Config.SERVICE_STATUS_STOP;
-            //fileWriter.closeFile();
-            // timers stop
-            /*if (updateEE != null) {
-                updateEE.cancel();
-                updateEE.purge();
-            }*/
             if (updateTime != null) {
                 updateTime.cancel();
                 updateTime.purge();
@@ -154,7 +156,6 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
             mBuilder.setColor(ContextCompat.getColor(this, R.color.red));
             notification = mBuilder.build();
             mNotifyManager.notify(1, notification);
-            // mNotifyManager.cancel(1);
         }
     }
 
@@ -224,16 +225,23 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
         } else {
             if (fileWriter.hasFreeSpace()) {
                 wl.acquire();
-                createNotification();
+                if (notification==null) {
+                    createNotification();
+                }
                 if (offset == null) {
                     getCalibrationValues();
                 }
                 // Now that we have a notification, we disalow android to kill the service
-                startForeground(serviceID, notification);
+                if (notification!=null) {
+                    //TODO: startForeground(serviceID, notification);
+                }
                 sensors.addOnChangedListener(this);
                 sensors.start(sensorMap);
                 serviceStatus = Config.SERVICE_STATUS_RUNNING;
-                //TODO: might not start at the same time as sensor events..
+                if (updateTime != null) {
+                    updateTime.cancel();
+                    updateTime.purge();
+                }
                 updateTime = new Timer();
                 updateTime.schedule(new updateTime(), 1000, 1000);
             } else {
@@ -254,6 +262,7 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
                     updateTime.cancel();
                     updateTime.purge();
                 }
+                stopForeground(true);
                 viewCtrl.updateViewTime(0);
                 timestamp = 0;
             }
