@@ -233,7 +233,7 @@ public class SensorsService extends Service implements SensorListener, ServiceOp
                 }
                 // Now that we have a notification, we disalow android to kill the service
                 if (notification!=null) {
-                    //TODO: startForeground(serviceID, notification);
+                    startForeground(1, notification);
                 }
                 sensors.addOnChangedListener(this);
                 sensors.start(sensorMap);
