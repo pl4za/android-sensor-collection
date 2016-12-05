@@ -1,18 +1,24 @@
 package com.ubi.jason.sensorcollect;
 
+import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.DialogFragment;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -113,9 +119,70 @@ public class MainActivity extends AppCompatActivity implements DialogListener, A
         drawerToggle.syncState();
     }
 
+    /*
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+     */
+
+    private static final int PERMISSIONS = 0;
+
+    @TargetApi(23)
+    private void checkPermissions() {
+        ArrayList<String> permissions = new ArrayList<String>();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.ACCESS_WIFI_STATE);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.WAKE_LOCK);
+        }
+        String[] perm = new String[permissions.size()];
+        for (int i = 0; i < permissions.size(); i++) {
+            perm[i] = permissions.get(i);
+        }
+        if (perm.length > 0) {
+            ActivityCompat.requestPermissions(this, perm, PERMISSIONS);
+        } else {
+            startService();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startService();
+                } else {
+                    Toast.makeText(this, "Todas as permissões são necessárias!", Toast.LENGTH_LONG);
+                    finish();
+                }
+                return;
+            }
+        }
+    }
+
     @Override
     public void onResume() {
         Log.i(TAG, "onResume");
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkPermissions();
+        } else {
+            startService();
+        }
+        super.onResume();
+    }
+
+    private void startService() {
         if (!mBound) {
             Log.i(TAG, "startService");
             if (sensorsService == null) {
@@ -128,7 +195,6 @@ public class MainActivity extends AppCompatActivity implements DialogListener, A
                 }
             }
         }
-        super.onResume();
     }
 
     @Override
