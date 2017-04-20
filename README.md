@@ -3,7 +3,9 @@ Records accelerometry data in a CSV file for information extraction with auto fi
 
 ********************************************************************************
 This version POSTS user info and accelerometer data to:
+
 http://193.136.67.246/~jason/sensorsDataTese/fileUpload.php
+
 User information JSON is encrypted using RSA encryption (public key in phone / private key in server)
 ********************************************************************************
 
